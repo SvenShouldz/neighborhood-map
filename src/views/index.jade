@@ -5,3 +5,9 @@ block content
 	#wrapper
 		#map
 		#menu
+			form(action="#" data-bind="submit: search")
+				input( placeholder="Search" type="search" name="q" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off")
+
+			ul(data-bind="foreach: places")
+				li
+					span(data-bind="text: name")

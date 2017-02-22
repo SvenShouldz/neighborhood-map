@@ -8,7 +8,7 @@ var gutil = require('gulp-util');
 var stylus = require('gulp-stylus');
 var uglifyCSS = require('gulp-uglifycss');
 var browserSync = require('browser-sync');
-var browserify = require('gulp-browserify');
+var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
 
@@ -21,19 +21,21 @@ var path = {
 	img: './' + env + '/images/*.+(jpg|png)',
 	css: './' + env + '/styles/*.styl',
 	routes: './' + env + '/routes/*.js',
-	views: './' + env + '/views/*.jade'
+	views: './' + env + '/views/*.jade',
+	js: './' + env + '/public/js/',
+	bundle: './' + env + '/public/js/bundle.js'
 }
 
-gulp.task('default', ['scripts', 'styles', 'browser-sync']);
+gulp.task('default', ['scripts', 'styles', 'browserify', 'browser-sync']);
 
-gulp.task('browser-sync', ['scripts', 'styles', 'nodemon'], function() {
+gulp.task('browser-sync', ['scripts', 'styles', 'browserify', 'nodemon'], function() {
 	browserSync.init(null, {
 		proxy: "http://localhost:5000",
         browser: "google chrome",
         port: 7000,
 	});
 	gulp.watch(path.css, ['styles']);
-	gulp.watch(path.scripts, ['scripts']);
+	gulp.watch(path.scripts, ['scripts', 'browserify']);
   gulp.watch('**/*.*').on('change', browserSync.reload);
 });
 
@@ -57,12 +59,17 @@ gulp.task('scripts', function(){
 	// all scripts get browser- and uglyfied
 	return gulp.src(path.scripts)
 		.pipe(concat('bundle.js'))
-		.browserify()
+		.pipe(gulp.dest(path.js))
+		.on('end', function(){ gutil.log('Gulp piped scripts to bundle.js') });
+});
+
+gulp.task('browserify', ['scripts'], function(){
+	// browserify resolves all requirements
+	return browserify(path.bundle)
 		.bundle()
 		.pipe(source('bundle.js'))
-		.pipe(streamify(uglify()))
-		.pipe(gulp.dest('./' + env + '/public/js'))
-		.on('end', function(){ gutil.log('Gulp piped scripts to bundle.js') });
+		.pipe(gulp.dest(path.js))
+		.on('end', function(){ gutil.log('Gulp\'s bundle.js got browserified') });
 });
 
 gulp.task('styles', function(){
@@ -72,5 +79,5 @@ gulp.task('styles', function(){
 	.pipe(concat('style.css'))
 	.pipe(uglifyCSS())
 	.pipe(gulp.dest('./' + env + '/public/css'))
-	.on('end', function(){ gutil.log('Gulp piped styles to style.css')  });
-})
+	.on('end', function(){ gutil.log('Gulp piped styles to style.css')});
+});
