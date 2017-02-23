@@ -14,7 +14,8 @@
     "knockout": "^3.4.1",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "stylus": "^0.54.5"
+    "stylus": "^0.54.5",
+    "superagent": "^3.4.4"
   },
   "devDependencies": {
     "browser-sync": "^2.18.8",

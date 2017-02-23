@@ -10,4 +10,4 @@ block content
 
 			ul(data-bind="foreach: places")
 				li
-					span(data-bind="text: name")
+					span(data-bind="text: name, click: $parent.clickPlace")

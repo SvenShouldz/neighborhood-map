@@ -1,37 +1,39 @@
+//controller.js
+
 var ko = require('knockout');
+var request = require('superagent');
 
-console.log("KNOCKOUTSCRIPT");
-
-var data = [
-						{ name: 'Isartor', lat: '48.135302', lng: '11.581703'},
-						{ name: 'Sendlinger Tor', lat: '48.133996', lng: '11.567702'},
-						{ name: 'Marienplatz', lat: '48.13723', lng: '11.575514'},
-						{ name: 'Stachus', lat: '48.13914', lng: '11.566359'},
-						{ name: 'Bayerischer Rundfunk', lat: '48.142979', lng: '11.554475'},
-						{ name: 'Google München', lat: '48.142895', lng: '11.540916'},
-						{ name: 'Viktualienmarkt', lat: '48.135254', lng: '11.575947'},
-						{ name: 'Museumsinsel', lat: '48.129667', lng: '11.582556'},
-						{ name: 'Tierpark Hellabrunn', lat: '48.097934', lng: '11.554785'},
-						{ name: 'Allianz Arena', lat: '48.21882', lng: '11.624697'},
-						{ name: 'Olympia-Park', lat: '48.174748', lng: '11.550295'},
-						{ name: 'Flaucher-Insel', lat: '48.104218', lng: '11.552908'}
-					];
+function wikiCall(searchPlace){
+	request
+		.get('https://en.wikipedia.org/api/rest_v1/page/mobile-text/' + searchPlace)
+		.end(function(err, res){
+			if (err || !res.ok) {
+				console.log(err);
+			} else {
+				console.log(res.body);
+			}
+		});
+}
 
 var viewModel = {
-		query: ko.observable(''),
-		places: ko.observable(),
+
+		query: ko.observable(''), // Gets input from User
+		places: ko.observableArray(data), // Stores data as observable Array
 
 		search: function(value) {
-			viewModel.places = [];
-			console.log(value)
-
+			viewModel.places([]); // Empty array for iterating through data
 			for (var i = 0; i < data.length; i++) {
-
+				// Iterates through data and pushes results into the empty places array
 				if(data[i].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
 					viewModel.places.push(data[i]);
 				}
-					console.log(viewModel.places);
 			}
+		},
+
+		clickPlace: function(place){
+			wikiCall(place.name);
+			map.setCenter(place.location);
+			map.setZoom(18);
 		}
 };
 
