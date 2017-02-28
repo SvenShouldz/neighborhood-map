@@ -93,7 +93,6 @@ gulp.task('css',['clean', 'copy'], function(){
 		.on('end', function(){ gutil.log('Gulp piped styles to style.css')});
 })
 
-
 gulp.task('pro', ['clean', 'copy', 'js', 'jspublish', 'css', 'uglify'], function(cb){
 
 		var started = false;
