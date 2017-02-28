@@ -41,7 +41,7 @@ var viewModel = {
 			desc: ko.observable()
 		},
 		infoWindow: ko.observable(0), // Visibility of the infoWindow
-		displayWindow: ko.observable(), // display of the infoWindow
+		displayWindow: ko.observable('none'), // display of the infoWindow
 		loadInfo: ko.observable(0), // Visibility of content of infoWindow
 
 

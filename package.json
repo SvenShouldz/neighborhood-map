@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "gulp"
+    "start": "gulp pro"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -13,7 +13,6 @@
     "jade": "~1.11.0",
     "knockout": "^3.4.1",
     "morgan": "~1.6.1",
-    "serve-favicon": "~2.3.0",
     "stylus": "^0.54.5",
     "superagent": "^3.4.4"
   },
@@ -22,6 +21,7 @@
     "browserify": "^14.1.0",
     "gulp": "^3.9.1",
     "gulp-browserify": "^0.5.1",
+    "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.1",
     "gulp-nodemon": "^2.2.1",
     "gulp-streamify": "^1.0.2",

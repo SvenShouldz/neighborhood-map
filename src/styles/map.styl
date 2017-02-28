@@ -3,12 +3,17 @@
 	width 100vw
 	height 100vh
 	display flex
-	flex-direction row
-
+	flex-direction column
+	@media (min-width: 760px)
+		flex-direction row
 #map
-	width 75vw
-	height 100vh
+	width 100vw
+	min-height 50vh
+	display block
 	order 1
+ v
+		width 75vw
+		height 100vh
 
 img[src*='https://maps.gstatic.com/mapfiles/api-3/images/mapcnt6.png']
 	display: none;

@@ -1,8 +1,9 @@
 #menu
-	width 25vw
-	height 100vh
+	width 100vw
 	background white
-	order 2
+	order 3
+	@media screen and (min-width: 760px)
+		width 25vw
 
 	ul
 		overflow scroll
@@ -12,26 +13,30 @@
 		padding 0
 
 		li
-			width 100%
-			height 60px
+			height 100px
 			list-style none
 			padding-left 40px
-			font-size 20px
+			font-size 45px
 			&:nth-child(2n)
 				background lightgrey
 			&:hover
 				background blue
 				color white
+			@media screen and (min-width: 760px)
+				font-size 20px
+				height 60px
 
 			span
 				width 100%
 				height 40px
 				display block
-				padding-top 20px
+				padding-top 10px //20px
 				cursor pointer
-
 	input
 		width 100%
-		height 5%
 		padding 10px
-		font-size 20px
+		font-size 45px
+		border-radius 0
+		-webkit-appearance: none;
+		@media screen and (min-width: 760px)
+			font-size 25px
