@@ -7,7 +7,7 @@ var data = [
 						{ name: 'Viktualienmarkt', location: {lat: 48.135254, lng: 11.575947}},
 						{ name: 'Isartor', location: {lat: 48.135302, lng: 11.581703}},
 						{ name: 'Sendlinger Tor', location: {lat: 48.133996, lng: 11.567702}},
-						{ name: 'Hofgarten', location: {lat: 48.142769, lng: 11.581183}},
+						{ name: 'Bayerische Staatskanzlei', location: {lat: 48.142673, lng: 11.582755}},
 						{ name: 'Englischer Garten', location: {lat: 48.14897, lng: 11.588801}},
 						{ name: 'FC Bayern München', location: {lat: 48.101343, lng: 11.573952}},
 						{ name: 'Bayerischer Rundfunk', location: {lat: 48.143448, lng: 11.553696}},

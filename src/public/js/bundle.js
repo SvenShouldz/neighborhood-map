@@ -7847,7 +7847,7 @@ var data = [
 						{ name: 'Viktualienmarkt', location: {lat: 48.135254, lng: 11.575947}},
 						{ name: 'Isartor', location: {lat: 48.135302, lng: 11.581703}},
 						{ name: 'Sendlinger Tor', location: {lat: 48.133996, lng: 11.567702}},
-						{ name: 'Hofgarten', location: {lat: 48.142769, lng: 11.581183}},
+						{ name: 'Bayerische Staatskanzlei', location: {lat: 48.142673, lng: 11.582755}},
 						{ name: 'Englischer Garten', location: {lat: 48.14897, lng: 11.588801}},
 						{ name: 'FC Bayern München', location: {lat: 48.101343, lng: 11.573952}},
 						{ name: 'Bayerischer Rundfunk', location: {lat: 48.143448, lng: 11.553696}},
@@ -7868,40 +7868,89 @@ var ko = require('knockout');
 var request = require('superagent');
 
 function wikiCall(searchPlace){
+	viewModel.loadInfo(0);
 	request
-		.get('https://en.wikipedia.org/api/rest_v1/page/mobile-text/' + searchPlace)
+		.get('https://en.wikipedia.org/api/rest_v1/page/summary/' + searchPlace)
 		.end(function(err, res){
 			if (err || !res.ok) {
-				console.log(err);
+				viewModel.wiki.text("Error when loading:", err)
 			} else {
-				console.log(res.body);
+				viewModel.wiki.text(textTrans(res.body.extract));
+				viewModel.wiki.img('url(\'' + res.body.thumbnail.original + '\')');
+				viewModel.wiki.title(res.body.title);
+				viewModel.wiki.url('https://en.wikipedia.org/wiki/' + res.body.title)
 			}
 		});
+}
+
+function textTrans(text){
+	var chapter = text.indexOf("== ")
+	if( chapter >= 0){
+		return text.slice(0, chapter);
+	}else{
+		return text
+	}
+
 }
 
 var viewModel = {
 
 		query: ko.observable(''), // Gets input from User
 		places: ko.observableArray(data), // Stores data as observable Array
+		wiki: { // stores information from wikipedia
+			text: ko.observable(),
+			img: ko.observable(),
+			title: ko.observable(),
+			url: ko.observable(),
+			desc: ko.observable()
+		},
+		infoWindow: ko.observable(0), // Visibility of the infoWindow
+		displayWindow: ko.observable(), // display of the infoWindow
+		loadInfo: ko.observable(0), // Visibility of content of infoWindow
 
-		search: function(value) {
-			viewModel.places([]); // Empty array for iterating through data
-			for (var i = 0; i < data.length; i++) {
-				// Iterates through data and pushes results into the empty places array
-				if(data[i].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
-					viewModel.places.push(data[i]);
+
+		search: function(value) { // Search Input
+			if(typeof value === 'object' && value instanceof Object){
+				// prevents user from submitting the form
+			}else{
+				viewModel.places([]); // Empty array for iterating through data
+				for (var i = 0; i < data.length; i++) {
+					// Iterates through data and pushes results into the empty places array
+					if(data[i].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
+						viewModel.places.push(data[i]);
+					}
 				}
 			}
+		},
+
+		markers: function() { // subscribed to changes in places and renders new markers
+			initMarkers();
+		},
+
+		closeWindow: function() { // closes infoWindow and stops marker to bounce
+			viewModel.infoWindow(0);
+			viewModel.displayWindow('none');
+			stopBounce();
+		},
+
+		openWindow: function() { // opens infoWindow
+			viewModel.displayWindow('');
+			viewModel.infoWindow(1);
 		},
 
 		clickPlace: function(place){
 			wikiCall(place.name);
 			map.setCenter(place.location);
 			map.setZoom(18);
+			viewModel.openWindow();
+			viewModel.loadInfo(1);
+			bounceMarker(place.name)
 		}
 };
 
 viewModel.query.subscribe(viewModel.search);
+
+viewModel.places.subscribe(viewModel.markers);
 
 ko.applyBindings(viewModel);
 
@@ -7909,9 +7958,9 @@ ko.applyBindings(viewModel);
 
 var map;
 var markers = [];
-var centerMap = {lat: 48.135125, lng: 11.581981};
+var centerMap = {lat: 48.135302, lng: 11.581703};
 
-// Initial function for Google Maps which will start on
+// Initial function for Google Maps
 window.initMap = function() {
   map = new google.maps.Map(document.getElementById('map'), {
     center: centerMap,
@@ -7920,10 +7969,24 @@ window.initMap = function() {
 		tilt: 45
   });
 
-	var largeInfowindow = new google.maps.InfoWindow();
-	// Iterate through data array to create an array of markers on initialize
+	// Creates all markers
+	initMarkers();
+}
+
+// This function will hide all Markers
+function setMapOnAll(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
+
+function initMarkers() {
+	setMapOnAll(null); // Remove all markers from the Map
+	markers = []; // Empty Markers array
+
+	// Loops through viewModel.places and sets Markers
 	for (var i = 0; i < viewModel.places().length; i++) {
-		// Get positions and name from data array
+		// Get positions and name from viewModel.places array
 		var position = viewModel.places()[i].location;
 		var title = viewModel.places()[i].name;
 
@@ -7934,16 +7997,40 @@ window.initMap = function() {
 			animation: google.maps.Animation.DROP,
 			id: i
 		});
+
 		markers.push(marker)
+
+		var infowindow = new google.maps.InfoWindow();
 
 		marker.addListener('click', function(){
 			var myMarker = { name: this.title, location: {lat: this.position.lat(), lng: this.position.lng()}}
 			viewModel.clickPlace(myMarker)
-		})
+		});
 
+		marker.addListener('mouseover', function() {
+			infowindow.setContent('<div class="infoWindow">' + this.title + '</div>');
+			infowindow.open(map, this);
+		});
+		marker.addListener('mouseout', function() {
+			infowindow.close();
+		});
 	}
+}
 
+function stopBounce() {
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setAnimation(null);
+	}
+}
 
+function bounceMarker(name){
+	for(var i = 0; i < markers.length; i++){
+		if(markers[i].title.toLowerCase().indexOf(name.toLowerCase()) >= 0) {
+			markers[i].setAnimation(google.maps.Animation.BOUNCE);
+		}else{
+			markers[i].setAnimation(null);
+		}
+	}
 }
 
 },{"knockout":1,"superagent":2}]},{},[10]);

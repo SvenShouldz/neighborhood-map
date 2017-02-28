@@ -3,6 +3,16 @@ extends layout
 block content
 
 	#wrapper
+		#wiki(data-bind="style: {opacity: infoWindow, display: displayWindow}")
+			#img(data-bind="style: {backgroundImage: wiki.img, opacity: loadInfo}")
+			#text(data-bind="style: {opacity: loadInfo}")
+				h1(data-bind="text: wiki.title")
+				p(data-bind="text: wiki.text")
+				a(data-bind="attr: {href:wiki.url, title: wiki.title, target: '_blank'}") » wikipedia.org
+				#closeWindow(data-bind="click: closeWindow")
+					svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.36 28.36")
+						title Unbenannt-2
+						path.svg(d="M224,285.69l-2.86-2.86-11.32,11.32-11.32-11.32-2.86,2.86L207,297l-11.32,11.32,2.86,2.86,11.32-11.32,11.32,11.32,2.86-2.86L212.71,297Z" transform="translate(-195.68 -282.84)")
 		#map
 		#menu
 			form(action="#" data-bind="submit: search")
