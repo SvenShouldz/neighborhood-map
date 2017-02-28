@@ -33,7 +33,7 @@ function initMarkers() {
 		// Get positions and name from viewModel.places array
 		var position = viewModel.places()[i].location;
 		var title = viewModel.places()[i].name;
-
+		// markers get set
 		var marker = new google.maps.Marker({
 			map: map,
 			position: position,
@@ -41,32 +41,37 @@ function initMarkers() {
 			animation: google.maps.Animation.DROP,
 			id: i
 		});
-
+		// push them to our markers array
 		markers.push(marker)
 
+		// InfoWindow for the "titlebox"
 		var infowindow = new google.maps.InfoWindow();
 
+		// Listens for click on marker and calls viewModel.clickPlace
 		marker.addListener('click', function(){
 			var myMarker = { name: this.title, location: {lat: this.position.lat(), lng: this.position.lng()}}
 			viewModel.clickPlace(myMarker)
 		});
-
+		// Listens for mousover on marker for showing the titlebox
 		marker.addListener('mouseover', function() {
 			infowindow.setContent('<div class="infoWindow">' + this.title + '</div>');
 			infowindow.open(map, this);
 		});
+		// hides the titlebox
 		marker.addListener('mouseout', function() {
 			infowindow.close();
 		});
 	}
 }
 
+// stops all markers from bouncing
 function stopBounce() {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setAnimation(null);
 	}
 }
 
+// sets given marker on bounce
 function bounceMarker(name){
 	for(var i = 0; i < markers.length; i++){
 		if(markers[i].title.toLowerCase().indexOf(name.toLowerCase()) >= 0) {

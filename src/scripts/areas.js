@@ -1,5 +1,7 @@
 // areas.js
 
+
+//my data, i dont wanted to load them so i just placed them here.
 var data = [
 						{ name: 'Stachus', location: {lat: 48.13914, lng: 11.566359}},
 						{ name: 'München Frauenkirche', location: {lat: 48.13876, lng: 11.573619}},

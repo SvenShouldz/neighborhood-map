@@ -1,8 +1,11 @@
 //controller.js
 
+// important requirements, they will be solved by browserify
 var ko = require('knockout');
 var request = require('superagent');
 
+
+// this functions calls the wiki rest-api and gets data for our infoWindow
 function wikiCall(searchPlace){
 	viewModel.loadInfo(0);
 	request
@@ -10,6 +13,7 @@ function wikiCall(searchPlace){
 		.end(function(err, res){
 			if (err || !res.ok) {
 				viewModel.wiki.text("Error when loading:", err)
+				// when we get an error, this should be shown in the infoWindow
 			} else {
 				viewModel.wiki.text(textTrans(res.body.extract));
 				viewModel.wiki.img('url(\'' + res.body.thumbnail.original + '\')');
@@ -19,6 +23,7 @@ function wikiCall(searchPlace){
 		});
 }
 
+// the provided wikipedia text was too long, so i cutted it when they start a new chapter
 function textTrans(text){
 	var chapter = text.indexOf("== ")
 	if( chapter >= 0){
@@ -26,9 +31,9 @@ function textTrans(text){
 	}else{
 		return text
 	}
-
 }
 
+// My beautiful Knockout viewModel
 var viewModel = {
 
 		query: ko.observable(''), // Gets input from User
@@ -74,18 +79,18 @@ var viewModel = {
 			viewModel.infoWindow(1);
 		},
 
-		clickPlace: function(place){
-			wikiCall(place.name);
+		clickPlace: function(place){ // this function is called when we click a marker or listpoint
+			wikiCall(place.name); // calls wikipedia data
 			map.setCenter(place.location);
-			map.setZoom(18);
-			viewModel.openWindow();
-			viewModel.loadInfo(1);
-			bounceMarker(place.name)
+			map.setZoom(18); //sets center of map & zoom
+			viewModel.openWindow(); // open infoWindow
+			viewModel.loadInfo(1); // shows Text & Image
+			bounceMarker(place.name) // for our bouncy marker
 		}
 };
 
-viewModel.query.subscribe(viewModel.search);
+viewModel.query.subscribe(viewModel.search); // listens to the input for changes
 
-viewModel.places.subscribe(viewModel.markers);
+viewModel.places.subscribe(viewModel.markers); // listens to the places array for changes
 
-ko.applyBindings(viewModel);
+ko.applyBindings(viewModel); // binds our model to the dom
