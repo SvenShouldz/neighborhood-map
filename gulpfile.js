@@ -117,7 +117,7 @@ gulp.task('browser-sync', ['scripts', 'styles', 'browserify', 'nodemon'], functi
         browser: "google chrome",
         port: 7000,
 	});
-	gulp.watch(bases.app + path.css[1], ['styles']);
+	gulp.watch(bases.app + path.stylus[1], ['styles']);
 	gulp.watch(bases.app + path.scripts[1], ['scripts', 'browserify']);
   gulp.watch('**/*.*').on('change', browserSync.reload);
 });

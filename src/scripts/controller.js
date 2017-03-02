@@ -4,7 +4,6 @@
 var ko = require('knockout');
 var request = require('superagent');
 
-
 // this functions calls the wiki rest-api and gets data for our infoWindow
 function wikiCall(searchPlace){
 	viewModel.loadInfo(0);
@@ -12,7 +11,8 @@ function wikiCall(searchPlace){
 		.get('https://en.wikipedia.org/api/rest_v1/page/summary/' + searchPlace)
 		.end(function(err, res){
 			if (err || !res.ok) {
-				viewModel.wiki.text("Error when loading:", err)
+				viewModel.wiki.text("Error when loading...")
+				viewModel.wiki.url('https://en.wikipedia.org/wiki/' + searchPlace)
 				// when we get an error, this should be shown in the infoWindow
 			} else {
 				viewModel.wiki.text(textTrans(res.body.extract));
@@ -60,12 +60,13 @@ var viewModel = {
 					if(data[i].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
 						viewModel.places.push(data[i]);
 					}
+					if(markers[i].title.toLowerCase().indexOf(value.toLowerCase()) >= 0){
+						markers[i].setMap(map);
+					}else{
+						markers[i].setMap(null)
+					}
 				}
 			}
-		},
-
-		markers: function() { // subscribed to changes in places and renders new markers
-			initMarkers();
 		},
 
 		closeWindow: function() { // closes infoWindow and stops marker to bounce
@@ -90,7 +91,5 @@ var viewModel = {
 };
 
 viewModel.query.subscribe(viewModel.search); // listens to the input for changes
-
-viewModel.places.subscribe(viewModel.markers); // listens to the places array for changes
 
 ko.applyBindings(viewModel); // binds our model to the dom

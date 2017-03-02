@@ -7840,6 +7840,8 @@ Emitter.prototype.hasListeners = function(event){
 },{}],10:[function(require,module,exports){
 // areas.js
 
+
+//my data, i dont wanted to load them so i just placed them here.
 var data = [
 						{ name: 'Stachus', location: {lat: 48.13914, lng: 11.566359}},
 						{ name: 'München Frauenkirche', location: {lat: 48.13876, lng: 11.573619}},
@@ -7864,16 +7866,20 @@ var data = [
 
 //controller.js
 
+// important requirements, they will be solved by browserify
 var ko = require('knockout');
 var request = require('superagent');
 
+// this functions calls the wiki rest-api and gets data for our infoWindow
 function wikiCall(searchPlace){
 	viewModel.loadInfo(0);
 	request
 		.get('https://en.wikipedia.org/api/rest_v1/page/summary/' + searchPlace)
 		.end(function(err, res){
 			if (err || !res.ok) {
-				viewModel.wiki.text("Error when loading:", err)
+				viewModel.wiki.text("Error when loading...")
+				viewModel.wiki.url('https://en.wikipedia.org/wiki/' + searchPlace)
+				// when we get an error, this should be shown in the infoWindow
 			} else {
 				viewModel.wiki.text(textTrans(res.body.extract));
 				viewModel.wiki.img('url(\'' + res.body.thumbnail.original + '\')');
@@ -7883,6 +7889,7 @@ function wikiCall(searchPlace){
 		});
 }
 
+// the provided wikipedia text was too long, so i cutted it when they start a new chapter
 function textTrans(text){
 	var chapter = text.indexOf("== ")
 	if( chapter >= 0){
@@ -7890,9 +7897,9 @@ function textTrans(text){
 	}else{
 		return text
 	}
-
 }
 
+// My beautiful Knockout viewModel
 var viewModel = {
 
 		query: ko.observable(''), // Gets input from User
@@ -7919,12 +7926,13 @@ var viewModel = {
 					if(data[i].name.toLowerCase().indexOf(value.toLowerCase()) >= 0) {
 						viewModel.places.push(data[i]);
 					}
+					if(markers[i].title.toLowerCase().indexOf(value.toLowerCase()) >= 0){
+						markers[i].setMap(map);
+					}else{
+						markers[i].setMap(null)
+					}
 				}
 			}
-		},
-
-		markers: function() { // subscribed to changes in places and renders new markers
-			initMarkers();
 		},
 
 		closeWindow: function() { // closes infoWindow and stops marker to bounce
@@ -7938,27 +7946,30 @@ var viewModel = {
 			viewModel.infoWindow(1);
 		},
 
-		clickPlace: function(place){
-			wikiCall(place.name);
+		clickPlace: function(place){ // this function is called when we click a marker or listpoint
+			wikiCall(place.name); // calls wikipedia data
 			map.setCenter(place.location);
-			map.setZoom(18);
-			viewModel.openWindow();
-			viewModel.loadInfo(1);
-			bounceMarker(place.name)
+			map.setZoom(18); //sets center of map & zoom
+			viewModel.openWindow(); // open infoWindow
+			viewModel.loadInfo(1); // shows Text & Image
+			bounceMarker(place.name) // for our bouncy marker
 		}
 };
 
-viewModel.query.subscribe(viewModel.search);
+viewModel.query.subscribe(viewModel.search); // listens to the input for changes
 
-viewModel.places.subscribe(viewModel.markers);
-
-ko.applyBindings(viewModel);
+ko.applyBindings(viewModel); // binds our model to the dom
 
 // map.js
 
-var map;
+var map, infowindow;
 var markers = [];
 var centerMap = {lat: 48.135302, lng: 11.581703};
+
+// Handles errors from GoogleMaps
+window.errorHandler = function(){
+	alert("Error! Something is wrong with GoogleMaps!");
+}
 
 // Initial function for Google Maps
 window.initMap = function() {
@@ -7971,17 +7982,12 @@ window.initMap = function() {
 
 	// Creates all markers
 	initMarkers();
-}
 
-// This function will hide all Markers
-function setMapOnAll(map) {
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
-  }
+	// InfoWindow for the "titlebox"
+	infowindow = new google.maps.InfoWindow();
 }
 
 function initMarkers() {
-	setMapOnAll(null); // Remove all markers from the Map
 	markers = []; // Empty Markers array
 
 	// Loops through viewModel.places and sets Markers
@@ -7989,7 +7995,7 @@ function initMarkers() {
 		// Get positions and name from viewModel.places array
 		var position = viewModel.places()[i].location;
 		var title = viewModel.places()[i].name;
-
+		// markers get set
 		var marker = new google.maps.Marker({
 			map: map,
 			position: position,
@@ -7997,32 +8003,34 @@ function initMarkers() {
 			animation: google.maps.Animation.DROP,
 			id: i
 		});
-
+		// push them to our markers array
 		markers.push(marker)
 
-		var infowindow = new google.maps.InfoWindow();
-
+		// Listens for click on marker and calls viewModel.clickPlace
 		marker.addListener('click', function(){
 			var myMarker = { name: this.title, location: {lat: this.position.lat(), lng: this.position.lng()}}
 			viewModel.clickPlace(myMarker)
 		});
-
+		// Listens for mousover on marker for showing the titlebox
 		marker.addListener('mouseover', function() {
 			infowindow.setContent('<div class="infoWindow">' + this.title + '</div>');
 			infowindow.open(map, this);
 		});
+		// hides the titlebox
 		marker.addListener('mouseout', function() {
 			infowindow.close();
 		});
 	}
 }
 
+// stops all markers from bouncing
 function stopBounce() {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setAnimation(null);
 	}
 }
 
+// sets given marker on bounce
 function bounceMarker(name){
 	for(var i = 0; i < markers.length; i++){
 		if(markers[i].title.toLowerCase().indexOf(name.toLowerCase()) >= 0) {

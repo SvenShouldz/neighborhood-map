@@ -1,8 +1,13 @@
 // map.js
 
-var map;
+var map, infowindow;
 var markers = [];
 var centerMap = {lat: 48.135302, lng: 11.581703};
+
+// Handles errors from GoogleMaps
+window.errorHandler = function(){
+	alert("Error! Something is wrong with GoogleMaps!");
+}
 
 // Initial function for Google Maps
 window.initMap = function() {
@@ -15,17 +20,12 @@ window.initMap = function() {
 
 	// Creates all markers
 	initMarkers();
-}
 
-// This function will hide all Markers
-function setMapOnAll(map) {
-  for (var i = 0; i < markers.length; i++) {
-    markers[i].setMap(map);
-  }
+	// InfoWindow for the "titlebox"
+	infowindow = new google.maps.InfoWindow();
 }
 
 function initMarkers() {
-	setMapOnAll(null); // Remove all markers from the Map
 	markers = []; // Empty Markers array
 
 	// Loops through viewModel.places and sets Markers
@@ -43,9 +43,6 @@ function initMarkers() {
 		});
 		// push them to our markers array
 		markers.push(marker)
-
-		// InfoWindow for the "titlebox"
-		var infowindow = new google.maps.InfoWindow();
 
 		// Listens for click on marker and calls viewModel.clickPlace
 		marker.addListener('click', function(){
